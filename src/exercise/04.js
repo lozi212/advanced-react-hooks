@@ -5,8 +5,10 @@ import * as React from 'react'
 
 function MessagesDisplay({messages}) {
   const containerRef = React.useRef()
-  // 🐨 replace useEffect with useLayoutEffect
-  React.useEffect(() => {
+
+  // 🐨 useLayoutEffect runs after the DOM is updated
+  // but before the browser paints the screen.
+  React.useLayoutEffect(() => {
     containerRef.current.scrollTop = containerRef.current.scrollHeight
   })
 
@@ -14,7 +16,8 @@ function MessagesDisplay({messages}) {
     <div ref={containerRef} role="log">
       {messages.map((message, index, array) => (
         <div key={message.id}>
-          <strong>{message.author}</strong>: <span>{message.content}</span>
+          <strong>{message.author}</strong>:{' '}
+          <span>{message.content}</span>
           {array.length - 1 === index ? null : <hr />}
         </div>
       ))}
@@ -22,41 +25,62 @@ function MessagesDisplay({messages}) {
   )
 }
 
-// this is to simulate major computation/big rendering tree/etc.
+// This is to simulate major computation/big rendering tree/etc.
 function sleep(time = 0) {
   const wakeUpTime = Date.now() + time
+
   while (Date.now() < wakeUpTime) {}
 }
 
 function SlooooowSibling() {
-  // try this with useLayoutEffect as well to see
-  // how it impacts interactivity of the page before updates.
+  // You can try useLayoutEffect here as well
+  // to see how it impacts interactivity.
   React.useEffect(() => {
-    // increase this number to see a more stark difference
+    // Increase this number to see a more stark difference
     sleep(300)
   })
+
   return null
 }
 
 function App() {
-  const [messages, setMessages] = React.useState(allMessages.slice(0, 8))
+  const [messages, setMessages] = React.useState(
+    allMessages.slice(0, 8),
+  )
+
   const addMessage = () =>
     messages.length < allMessages.length
-      ? setMessages(allMessages.slice(0, messages.length + 1))
+      ? setMessages(
+          allMessages.slice(0, messages.length + 1),
+        )
       : null
+
   const removeMessage = () =>
     messages.length > 0
-      ? setMessages(allMessages.slice(0, messages.length - 1))
+      ? setMessages(
+          allMessages.slice(0, messages.length - 1),
+        )
       : null
 
   return (
     <div className="messaging-app">
-      <div style={{display: 'flex', justifyContent: 'space-between'}}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+        }}
+      >
         <button onClick={addMessage}>add message</button>
-        <button onClick={removeMessage}>remove message</button>
+
+        <button onClick={removeMessage}>
+          remove message
+        </button>
       </div>
+
       <hr />
+
       <MessagesDisplay messages={messages} />
+
       <SlooooowSibling />
     </div>
   )
@@ -64,7 +88,7 @@ function App() {
 
 export default App
 
-const allMessages = [
+  const allMessages = [
   `Leia: Aren't you a little short to be a stormtrooper?`,
   `Luke: What? Oh... the uniform. I'm Luke Skywalker. I'm here to rescue you.`,
   `Leia: You're who?`,
