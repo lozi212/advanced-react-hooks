@@ -3,16 +3,46 @@
 
 import * as React from 'react'
 
-function Counter({initialCount = 0, step = 1}) {
-  // 🐨 replace React.useState with React.useReducer.
-  // 💰 React.useReducer(countReducer, initialCount)
-  const [count, setCount] = React.useState(initialCount)
+function countReducer(state, action) {
+  // Extra 4: traditional action object with type
+  if (typeof action === 'object' && action !== null && action.type) {
+    switch (action.type) {
+      case 'INCREMENT':
+        return {...state, count: state.count + action.step}
+      case 'DECREMENT':
+        return {...state, count: state.count - action.step}
+      default:
+        throw new Error(`Unknown action type: ${action.type}`)
+    }
+  }
 
-  // 💰 you can write the countReducer function so you don't have to make any
-  // changes to the next two lines of code! Remember:
-  // The 1st argument is called "state" - the current value of count
-  // The 2nd argument is called "newState" - the value passed to setCount
-  const increment = () => setCount(count + step)
+  // Extra 3: action can be a function
+  if (typeof action === 'function') {
+    return action(state)
+  }
+
+  // Extra 2: action can be an object that merges with state
+  if (typeof action === 'object' && action !== null) {
+    return {...state, ...action}
+  }
+
+  // Extra 1: action can be a number
+  return {
+    ...state,
+    count: state.count + action,
+  }
+}
+
+function Counter({initialCount = 0, step = 1}) {
+  const [state, dispatch] = React.useReducer(countReducer, {
+    count: initialCount,
+  })
+
+  const {count} = state
+
+  // Extra 4: traditional dispatch object
+  const increment = () => dispatch({type: 'INCREMENT', step})
+
   return <button onClick={increment}>{count}</button>
 }
 
