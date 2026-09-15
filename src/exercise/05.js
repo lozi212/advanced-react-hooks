@@ -3,64 +3,106 @@
 
 import * as React from 'react'
 
-// 🐨 wrap this in a React.forwardRef and accept `ref` as the second argument
-function MessagesDisplay({messages}) {
+// 🐨 forwardRef allows the parent to pass a ref to this component
+const MessagesDisplay = React.forwardRef(function MessagesDisplay(
+  {messages},
+  ref,
+) {
   const containerRef = React.useRef()
+
   React.useLayoutEffect(() => {
     scrollToBottom()
   })
 
-  // 💰 you're gonna want this as part of your imperative methods
-  // function scrollToTop() {
-  //   containerRef.current.scrollTop = 0
-  // }
-  function scrollToBottom() {
-    containerRef.current.scrollTop = containerRef.current.scrollHeight
+  function scrollToTop() {
+    containerRef.current.scrollTop = 0
   }
 
-  // 🐨 call useImperativeHandle here with your ref and a callback function
-  // that returns an object with scrollToTop and scrollToBottom
+  function scrollToBottom() {
+    containerRef.current.scrollTop =
+      containerRef.current.scrollHeight
+  }
+
+  // 🐨 Expose these methods to the parent through the ref
+  React.useImperativeHandle(ref, () => ({
+    scrollToTop,
+    scrollToBottom,
+  }))
 
   return (
     <div ref={containerRef} role="log">
       {messages.map((message, index, array) => (
         <div key={message.id}>
-          <strong>{message.author}</strong>: <span>{message.content}</span>
+          <strong>{message.author}</strong>:{' '}
+          <span>{message.content}</span>
           {array.length - 1 === index ? null : <hr />}
         </div>
       ))}
     </div>
   )
-}
+})
 
 function App() {
   const messageDisplayRef = React.useRef()
-  const [messages, setMessages] = React.useState(allMessages.slice(0, 8))
+
+  const [messages, setMessages] = React.useState(
+    allMessages.slice(0, 8),
+  )
+
   const addMessage = () =>
     messages.length < allMessages.length
-      ? setMessages(allMessages.slice(0, messages.length + 1))
-      : null
-  const removeMessage = () =>
-    messages.length > 0
-      ? setMessages(allMessages.slice(0, messages.length - 1))
+      ? setMessages(
+          allMessages.slice(0, messages.length + 1),
+        )
       : null
 
-  const scrollToTop = () => messageDisplayRef.current.scrollToTop()
-  const scrollToBottom = () => messageDisplayRef.current.scrollToBottom()
+  const removeMessage = () =>
+    messages.length > 0
+      ? setMessages(
+          allMessages.slice(0, messages.length - 1),
+        )
+      : null
+
+  const scrollToTop = () =>
+    messageDisplayRef.current.scrollToTop()
+
+  const scrollToBottom = () =>
+    messageDisplayRef.current.scrollToBottom()
 
   return (
     <div className="messaging-app">
-      <div style={{display: 'flex', justifyContent: 'space-between'}}>
-        <button onClick={addMessage}>add message</button>
-        <button onClick={removeMessage}>remove message</button>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+        }}
+      >
+        <button onClick={addMessage}>
+          add message
+        </button>
+
+        <button onClick={removeMessage}>
+          remove message
+        </button>
       </div>
+
       <hr />
+
       <div>
-        <button onClick={scrollToTop}>scroll to top</button>
+        <button onClick={scrollToTop}>
+          scroll to top
+        </button>
       </div>
-      <MessagesDisplay ref={messageDisplayRef} messages={messages} />
+
+      <MessagesDisplay
+        ref={messageDisplayRef}
+        messages={messages}
+      />
+
       <div>
-        <button onClick={scrollToBottom}>scroll to bottom</button>
+        <button onClick={scrollToBottom}>
+          scroll to bottom
+        </button>
       </div>
     </div>
   )
@@ -82,7 +124,7 @@ const allMessages = [
   `Han: It's worse.`,
   `Luke: There's something alive in here!`,
   `Han: That's your imagination.`,
-  `Luke: Something just moves past my leg! Look! Did you see that?`,
+  `Luke: Something just moved past my leg! Look! Did you see that?`,
   `Han: What?`,
   `Luke: Help!`,
   `Han: Luke! Luke! Luke!`,
